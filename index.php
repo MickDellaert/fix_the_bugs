@@ -49,12 +49,12 @@ if(!empty($_POST['firstname']) && !empty($_POST['lastname'])) {
         $handle->execute();
         $userId = $_POST['id'];
     } else {
+        $userId = $pdo->lastInsertId();
         //why did I leave this if empty? There must be no important reason for this. Move on.
     }
 
     //@todo Why does this loop not work? If only I could see the bigger picture.
     foreach($_POST['sports'] AS $sport) {
-        $userId = $pdo->lastInsertId();
 
         $handle = $pdo->prepare('INSERT INTO sport (user_id, sport) VALUES (:userId, :sport)');
         $handle->bindValue(':userId', $userId);
@@ -72,12 +72,13 @@ elseif(isset($_POST['delete'])) {
     $message = 'Your record has been deleted';
 }
 
-//@todo Invalid query?
+//@todo Invalid query? >>> check if this actually fixed now
 $handle = $pdo->prepare('SELECT
        user.id,
        concat_ws(firstname, lastname, year) AS name,
        sport
 FROM user LEFT JOIN sport ON user.id = sport.user_id
+where year = :year
 order by sport');
 $handle->bindValue(':year', date('Y'));
 $handle->execute();
